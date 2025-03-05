@@ -80,7 +80,7 @@ jobs:
   deploy-prod:
     name: Deploy to Prod
     runs-on: ubuntu-latest
-    needs: approve-prod
+    needs: promote-to-test
     if: success() && needs.promote-to-test.result == 'success'
     steps:
     # Checkout the code to ensure we have access to the repository
