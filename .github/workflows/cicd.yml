@@ -52,7 +52,7 @@ jobs:
           git config --global user.email "github-actions@github.com"
           git fetch origin
           git checkout test
-          git merge --no-ff dev -m "Auto-merge dev into test"
+          git merge dev -m "Auto-merge dev into test"
           git push origin test
 
   approve-prod:
