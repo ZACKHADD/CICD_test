@@ -45,41 +45,59 @@ jobs:
     # Checkout the code to ensure we have access to the repository
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Merge Dev into Test
+        with:
+          fetch-depth: 0
+    #
+      - name: Fetch latest changes
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git fetch origin
           git checkout test
-          git merge --no-ff --allow-unrelated-histories dev -m "Auto-merge dev into test"
+          git pull origin test 
+
+      - name: Merge Dev into Test
+        run: |
+          git merge --no-ff dev -m "Auto-merge dev into test"
           git push origin test
 
-  approve-prod:
-    name: Manual Approval for Prod
-    runs-on: ubuntu-latest
-    needs: promote-to-test
-    if: github.ref == 'refs/heads/test'
-    steps:
+#  approve-prod:
+#    name: Manual Approval for Prod
+#    runs-on: ubuntu-latest
+#    needs: promote-to-test
+#    if: success() && needs.promote-to-test.result == 'success'
+#    steps:
     # Checkout the code to ensure we have access to the repository
-      - name: Checkout code
-        uses: actions/checkout@v4
+#      - name: Checkout code
+#        uses: actions/checkout@v4
 
-      - name: Request auto Approval
-        uses: hmarr/auto-approve-action@v3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
- #         pull-request-number: ${{ github.event.pull_request.number }} 'uncomment this when a manual approval is needed'
+#      - name: Request auto Approval
+#        uses: hmarr/auto-approve-action@v3
+#        with:
+#          github-token: ${{ secrets.GITHUB_TOKEN }}
+#          pull-request-number: ${{ github.event.pull_request.number }} 'uncomment this when a manual approval is needed'
 
   deploy-prod:
     name: Deploy to Prod
     runs-on: ubuntu-latest
-    needs: approve-prod
-    if: github.ref == 'refs/heads/prod'
+    needs: promote-to-test
+    if: success() && needs.promote-to-test.result == 'success'
     steps:
     # Checkout the code to ensure we have access to the repository
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Deploy to Prod
-        run: echo "Deploying to Production!" # Simulate deployment
+      - name: Fetch latest changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git fetch origin
+          git checkout prod
+          git pull origin prod 
+
+      - name: Merge Dev into prod
+        run: |
+          git merge --no-ff dev -m "Auto-merge dev into prod"
+          git push origin prod
