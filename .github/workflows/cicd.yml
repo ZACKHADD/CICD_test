@@ -45,14 +45,20 @@ jobs:
     # Checkout the code to ensure we have access to the repository
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Merge Dev into Test
+        with:
+          fetch-depth: 0
+    #
+      - name: Fetch latest changes
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git fetch origin
           git checkout test
-          git merge --no-ff --allow-unrelated-histories dev -m "Auto-merge dev into test"
+          git pull origin test 
+
+      - name: Merge Dev into Test
+        run: |
+          git merge --no-ff dev -m "Auto-merge dev into test"
           git push origin test
 
   approve-prod:
